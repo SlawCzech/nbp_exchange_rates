@@ -1,0 +1,95 @@
+{#{% load escape_js_code %}#}
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>NBP exchange rates</title>
+</head>
+<body>
+<form action="" method="POST" id="currencyForm">
+    {% csrf_token %}
+    {{ form }}
+    <button type="submit">Submit</button>
+</form>
+<div style="width: 800px;">
+    <canvas id="currencyChart"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+    (async function () {
+        const form = document.querySelector('#currencyForm');
+        const chartElement = document.getElementById('currencyChart');
+        const startDateInput = document.querySelector('input#id_start_date');
+        const endDateInput = document.querySelector('input#id_end_date');
+        const checkBoxes = document.querySelectorAll('input[name="currency"]')
+
+        let chart;
+        let names = [];
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            const response = await fetch('/currencies/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    start_date: startDateInput.value,
+                    end_date: endDateInput.value,
+                }),
+            });
+            const data = await response.json();
+            if (chart) {
+                chart.destroy(); // Usuń poprzedni wykres, jeśli istnieje
+            }
+
+
+            checkBoxes.forEach((checkbox) => {
+                checkbox.addEventListener('change', () => {
+                    if (checkbox.checked) {
+                        names.push(checkbox.value);
+                        console.log('Zaznaczono:', checkbox.value);
+                    } else {
+                        names = names.filter((name) => name !== checkbox.value)
+                        console.log('Odznaczono:', checkbox.value)
+                    }
+                });
+            });
+
+            const dataFilter = {...data, datasets: data.datasets.filter((dt) => names.includes(dt.label))}
+            chart = new Chart(chartElement, {
+                type: 'line',
+                data: dataFilter,
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            position: 'top',
+                        },
+                        title: {
+                            display: true,
+                            text: 'currency rate',
+                        },
+                    },
+                    scales: {
+                        y: {
+                            min: 0,
+                            max: 10,
+                            ticks: {
+                                stepSize: 0.01,
+                            },
+                        },
+                    },
+                },
+            });
+        });
+    })();
+
+</script>
+
+</body>
+</html>

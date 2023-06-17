@@ -4,7 +4,8 @@ from django import forms
 
 
 class ExchangeRateForm(forms.Form):
-    start_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date", "min": "2023-01-01"}))
+    start_date = forms.DateField(
+        widget=forms.DateInput(attrs={"type": "date", "min": "2023-01-01", "max": str(datetime.date.today())}))
     end_date = forms.DateField(widget=forms.DateInput(attrs={"type": "date", "max": str(datetime.date.today())}))
     currency = forms.MultipleChoiceField(choices=[], widget=forms.CheckboxSelectMultiple)
 
