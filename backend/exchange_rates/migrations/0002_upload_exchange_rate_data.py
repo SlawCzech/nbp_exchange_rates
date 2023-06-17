@@ -10,7 +10,7 @@ def load_exchange_rates(apps, schema_editor):
     CurrencyDate = apps.get_model("exchange_rates", "CurrencyDate")
     CurrencyValue = apps.get_model("exchange_rates", "CurrencyValue")
 
-    start_date = datetime.date(2005, 1, 2)
+    start_date = datetime.date(2022, 1, 2)
     end_date = datetime.date.today()
 
     data = get_initial_exchange_rates_data(start_date, end_date)
